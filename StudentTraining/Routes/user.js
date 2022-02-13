@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Student = require('../Models/Student.model.js');
-
+const { check, validationResult } = require('express-validator')
 // http://localhost:3000/user/select
 router.get('/user/select', async (req, res) => {
     // Student.getAll()
@@ -13,7 +13,15 @@ router.get('/user/select', async (req, res) => {
 
 // http://localhost:3000/user/add
 // { name : '', age : '' } POST
-router.post('/user/add', async (req, res) => {
+router.post('/user/add', 
+    check('name').notEmpty().withMessage('name is required'),
+    check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
+    async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    
     const name = req.body.name
     const age = req.body.age
     try {
@@ -32,7 +40,13 @@ router.post('/user/add', async (req, res) => {
 
 // http://localhost:3000/user/update/{id}
 // { name : '' } PUT
-router.patch('/user/update/:id', async (req, res) => {
+router.patch('/user/update/:id', 
+    check('name').notEmpty().withMessage('name is required'),
+    check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
+    async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });    
+
     const id = req.params.id;
     const name = req.body.name;
     const age = req.body.age;
