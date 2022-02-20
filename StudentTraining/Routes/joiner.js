@@ -128,3 +128,82 @@ router.get('/joiner/select', async (req, res) => {
 })
 
 module.exports = router
+
+
+// Q1. boss want to know number of students join on Java
+// SELECT 
+// count(js.id) AS numofstu
+// FROM jointedstudents AS js
+
+// LEFT JOIN classes AS cl
+// ON js.class_id = cl.id
+    
+// LEFT JOIN courses AS co
+// ON cl.course_id = co.id
+    
+// WHERE co.coursename = 'Java'
+
+
+// Boss wants to know totalfees get from course
+// CREATE VIEW AS sumFess
+// SELECT 
+// SUM(co.fees) AS numofstu
+// FROM jointedstudents AS js
+
+// LEFT JOIN classes AS cl
+// ON js.class_id = cl.id
+    
+// LEFT JOIN courses AS co
+// ON cl.course_id = co.id
+    
+// WHERE co.coursename = 'Java';
+
+
+// Boss wants to know summary of course.
+// SELECT c.*, 
+// Func_totalfees(c.coursename) AS totalFees, 
+// Func_numofstu(c.coursename) AS totalStus,
+// from courses c
+
+
+// Func_numofstu(? = java or php)
+// BEGIN
+// 	DECLARE numofstu INT;
+//     SELECT 
+//     count(js.id)
+//     FROM jointedstudents AS js
+    
+//     LEFT JOIN classes AS cl
+//     ON js.class_id = cl.id
+        
+//     LEFT JOIN courses AS co
+//     ON cl.course_id = co.id
+        
+//     WHERE co.coursename = Stuname
+    
+//     INTO numofstu;
+//     RETURN numofstu;
+// END
+
+// Func_totalfees(? = java or php)
+// BEGIN
+//   DECLARE totalFees INT;
+//   SELECT 
+//   SUM(co.fees)
+//   FROM jointedstudents AS js
+
+//   LEFT JOIN classes AS cl
+//   ON js.class_id = cl.id
+      
+//   LEFT JOIN courses AS co
+//   ON cl.course_id = co.id
+      
+//   WHERE co.coursename = Classname
+  
+//   INTO totalFees;
+  
+//   RETURN totalFees;
+// END
+
+
+// CREATE VIEW viewname AS Select ......
