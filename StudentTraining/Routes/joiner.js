@@ -5,6 +5,10 @@ const Class = require('../Models/Class.model.js');
 const Student = require('../Models/Student.model.js');
 const { check, validationResult } = require('express-validator')
 const JoinedStudent = require('../Models/JoinedStudent.model.js');
+const { sequelize } = require('../Models/index');
+const { QueryTypes } = require('sequelize');
+const Teacher = require("../Models/Teacher.model.js");
+const Course = require("../Models/Course.model.js");
 
 // http://localhost:3000/user/add
 // { name : '', age : '' } POST
@@ -63,6 +67,64 @@ router.post('/joiner/add',
         return res.send({ result : false })
     }    
     res.send({ result : true });
+})
+
+router.get('/joiner/select', async (req, res) => {
+  
+  // const datas = await sequelize.query(`
+  //   SELECT 
+  //     jointedstudents.*,
+  //     students.name,
+  //     students.age,
+  //     classes.start_date,
+  //     classes.teacher_id,
+  //     classes.course_id,
+  //     teachers.teacherfees,
+  //     teachers.name AS teacher_name,
+  //     teachers.qualitification,
+  //     courses.fees,
+  //     courses.coursename,
+  //     courses.courseduration
+  //   FROM jointedstudents
+  //     LEFT JOIN students
+  //       ON jointedstudents.student_id = students.id
+  //     LEFT JOIN classes
+  //       ON jointedstudents.class_id = classes.id
+  //     LEFT JOIN teachers
+  //       ON classes.teacher_id = teachers.id
+  //     LEFT JOIN courses
+  //       ON classes.course_id = courses.id;
+  //   `, { type: QueryTypes.SELECT });
+
+  const datas = await JoinedStudent.findAll({
+    include : [
+      {
+        model: Student,
+        attributes: ['name', 'age'],
+        as: "Student"
+      },
+      {
+        model: Class,
+        attributes: ['start_date', 'teacher_id', 'course_id'],
+        as: "Classes",
+        include : [
+          {
+            model : Teacher,
+            attributes : ['teacherfees', 'name', 'qualitification'],
+            as : "teacher"
+          },
+          {
+            model : Course,
+            attributes : ['fees', 'coursename', 'courseduration'],
+            as : "course"
+          }
+        ]
+      }
+    ]
+  });
+
+  res.send({ result : true, datas })
+
 })
 
 module.exports = router
