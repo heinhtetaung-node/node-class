@@ -13,5 +13,6 @@ Classes.init({
 
 Classes.belongsTo(Course, {as : 'course', foreignKey : 'course_id'})
 Classes.belongsTo(Teacher, {as : 'teacher', foreignKey : 'teacher_id'})
+Teacher.hasMany(Classes, {as : 'classes', foreignKey : 'teacher_id'})
 
 module.exports = Classes

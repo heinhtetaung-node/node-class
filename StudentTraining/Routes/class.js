@@ -47,4 +47,6 @@ router.post('/class/add',
     res.send({ result : true });
 })
 
+// HW : Update, delete, select
+
 module.exports = router

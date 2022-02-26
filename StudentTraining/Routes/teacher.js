@@ -1,7 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const Course = require('../Models/Course.model')
+const Class = require('../Models/Class.model')
 const Teacher = require('../Models/Teacher.model')
 const {check, validationResult} = require('express-validator')
+const { sequelize } = require('../Models/index');
+const { QueryTypes } = require('sequelize');
 
 // http://localhost:3000/teachers
 router.get('/teachers', async(req, res) => {
@@ -103,6 +107,46 @@ router.delete('/teachers/remove/:id', async (req, res) => {
     }
     res.send({
         result : true
+    })
+})
+
+router.get('/teachers/courses/:id', async (req, res) => {
+    const id = req.params.id
+
+    // const sql = `
+    // SELECT 
+    //   t.*,
+    //   co.*
+    // FROM teachers AS t
+    
+    // LEFT JOIN classes AS c
+    // ON c.teacher_id = t.id
+    // LEFT JOIN courses AS co
+    // ON co.id = c.course_id
+
+    // WHERE t.id = ${id}
+    // GROUP BY co.id
+    // `;
+
+    // const data = await sequelize.query(sql, { type : QueryTypes.SELECT })
+    
+    const data = await Teacher.findOne({
+        where : { id }, // = { id : id }
+        include : [{
+            model : Class, 
+            attributes : ['id'],
+            as : "classes",
+            include : [{ 
+                model: Course,
+                attributes: ['fees', 'coursename', 'courseduration'],
+                as: "course"
+            }]
+        }]
+    })
+
+    res.send({
+        result : true,
+        datas : data
     })
 })
 

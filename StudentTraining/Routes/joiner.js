@@ -129,6 +129,8 @@ router.get('/joiner/select', async (req, res) => {
 
 module.exports = router
 
+// HW: delete
+
 
 // Q1. boss want to know number of students join on Java
 // SELECT 
