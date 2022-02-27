@@ -7,6 +7,8 @@ const {check, validationResult} = require('express-validator')
 const { sequelize } = require('../Models/index');
 const { QueryTypes } = require('sequelize');
 
+const checkJwtMiddleware = require('../Middlewares/checkJwtMiddleware.js');
+
 // http://localhost:3000/teachers
 router.get('/teachers', async(req, res) => {
     const teachers = await Teacher.findAll()
@@ -16,6 +18,7 @@ router.get('/teachers', async(req, res) => {
 
 // http://localhost:3000/teachers/add
 router.post('/teachers/add', 
+    checkJwtMiddleware,
     check('teacherfees').notEmpty().withMessage('fees is required').isInt().withMessage('fees must be numeric'),
     check('name').notEmpty().withMessage('teacher name is required'),
     check('qualitification').notEmpty().withMessage('qualitification is required'),    
