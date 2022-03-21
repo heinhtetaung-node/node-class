@@ -1,7 +1,8 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
-import db from "./Models/migration"
+import { migrate } from "./Models/migration"
 import student from "./Routes/student"
-console.log(db)
+migrate()
+
 const app : Application = express()
 const port : number = 3000
 
