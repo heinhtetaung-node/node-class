@@ -1,83 +1,97 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
-import Student, { StudentTypeOutput } from "../Models/Student.model";
+import { StudentTypeOutput, StudentTypeInput } from "../Models/Student.model"
+import { findAllStudents, createStudent, getStudentDetail, updateStudent } from "../Repositories/StudentRepo";
+import { check, ValidationError, validationResult, Result } from "express-validator";
 
-// const { check, validationResult } = require('express-validator')
-// http://localhost:3000/user/select
-router.get('/student/select', async (req : Request, res : Response) => {
-    const users : StudentTypeOutput[] = await Student.findAll();
-    res.send(users);
+interface StudentGetAll {
+    success : boolean
+    datas : StudentTypeOutput[] | null
+}
+router.get('/student/select', async (req : Request, res : Response<StudentGetAll>) => {
+    try {
+        const users = await findAllStudents();
+        res.send({
+            success : true,
+            datas : users            
+        });
+    } catch (err : unknown) {
+        console.log(err)        
+        res.status(500).send({ success : false, datas : null })
+    }
 })
 
-export default router
-
-
-// // http://localhost:3000/user/add
-// // { name : '', age : '' } POST
-// router.post('/user/add', 
-//     check('name').notEmpty().withMessage('name is required'),
-//     check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
-//     async (req, res) => {
-//     const errors = validationResult(req)
-//     if (!errors.isEmpty()) {
-//         return res.status(400).json({ errors: errors.array() });
-//     }
+interface StudentCreate {
+    success : boolean
+    datas ?: StudentTypeOutput
+    validateError ?: Result<ValidationError>
+}
+router.post('/student/add', 
+    check('name').notEmpty().withMessage('name is required'),
+    check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
+    async (req : Request<StudentTypeInput>, res : Response<StudentCreate>) => {
+    const errors = validationResult(req)
     
-//     const name = req.body.name
-//     const age = req.body.age
-//     try {
-//         await Student.create({
-//             name,
-//             age
-//             // name : name,
-//             // age : age
-//         })
-//     } catch (err) {
-//         console.log(err)
-//         return res.send({ result : false })
-//     }    
-//     res.send({ result : true });
-// })
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ 
+            success : false,
+            validateError: errors            
+        });
+    }
+    
+    const name : string = req.body.name
+    const age : number = req.body.age
+    try {
+        const createdStudent = await createStudent({
+            name,
+            age
+        })
+        res.send({ success : true, datas : createdStudent });
+    } catch (err : unknown) {
+        console.log(err)
+        return res.send({ success : false })
+    }
+})
 
-// // http://localhost:3000/user/update/{id}
-// // { name : '' } PUT
-// router.patch('/user/update/:id', 
-//     check('name').notEmpty().withMessage('name is required'),
-//     check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
-//     async (req, res) => {
-//     const errors = validationResult(req)
-//     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });    
 
-//     const id = req.params.id;
-//     const name = req.body.name;
-//     const age = req.body.age;
-//     const singleUser = await Student.findByPk(id)
-//     console.log(singleUser)
-//     if (singleUser.length == 0) {
-//         return res.send({
-//             result : false,
-//             message : 'User not found!'
-//         })
-//     }
-//     try {
-//         await Student.update({
-//             name,
-//             age
-//         },{
-//             where: {
-//               id
-//             }
-//         })
-//     } catch (err) {
-//         console.log(err)
-//         return res.send({
-//             result : false
-//         })
-//     }
-//     res.send({
-//         result : true
-//     })
-// })
+interface StudentUpdate extends StudentCreate {
+    message ?: string
+}
+router.patch('/student/update/:id', 
+    check('name').notEmpty().withMessage('name is required'),
+    check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
+    async (req : Request<StudentTypeInput>, res : Response<StudentUpdate>) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) return res.status(400).json({ validateError: errors, success : false });    
+
+    const id : number = req.params.id as number;
+    const name : string = req.body.name;
+    const age : number = req.body.age;
+
+    try {
+        const updatedStudent = await updateStudent({ id, name, age })
+        if (updatedStudent === false) {
+            res.send({
+                success : false,
+                message : 'User not found!'               
+            })
+        } else {
+            res.send({
+                success : true,
+                datas : updatedStudent
+            })
+        }
+    } catch (err : unknown) {
+        console.log(err)
+        return res.send({
+            success : false,
+            message : 'something-wrong'
+        })
+    }    
+})
+
+
+export default router
 
 // // http://localhost:3000/user/remove/{id}
 // router.delete('/user/remove/:id', async (req, res) => {

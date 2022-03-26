@@ -37,7 +37,6 @@ Student.init({
     age: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true
     }
 }, {
     timestamps: true,

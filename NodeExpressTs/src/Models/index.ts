@@ -19,12 +19,4 @@ new Promise(async(reslove, reject) => {
     console.log(err)
 })
 
-interface db {
-    sequelize : Sequelize
-}
-
-export const db : db = {
-    sequelize : sequelize
-}
-
 export { sequelize }
