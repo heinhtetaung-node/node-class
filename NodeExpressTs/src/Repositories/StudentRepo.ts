@@ -21,3 +21,12 @@ export const updateStudent = async (student : StudentTypeInput) : Promise<Studen
     const updatedStudent = await (studentUpdate as Student).update(student)
     return updatedStudent;
 } 
+
+export const deleteStudent = async (id : number) : Promise<boolean> => {
+    const studentDelete = await Student.findByPk(id)
+    if (studentDelete === null) {
+        return false
+    }
+    await (studentDelete as Student).destroy()
+    return true
+}

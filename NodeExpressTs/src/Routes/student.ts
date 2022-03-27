@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
 import { StudentTypeOutput, StudentTypeInput } from "../Models/Student.model"
-import { findAllStudents, createStudent, getStudentDetail, updateStudent } from "../Repositories/StudentRepo";
+import { findAllStudents, createStudent, getStudentDetail, updateStudent, deleteStudent } from "../Repositories/StudentRepo";
 import { check, ValidationError, validationResult, Result } from "express-validator";
 
 interface StudentGetAll {
@@ -90,35 +90,24 @@ router.patch('/student/update/:id',
     }    
 })
 
+interface StudentDelete extends StudentCreate {
+    message?: string
+}
+router.delete('/student/remove/:id', async (req : Request, res : Response<StudentDelete>) => {
+    try {
+        const id : number = parseInt(req.params.id)
+        const result = await deleteStudent(id)
+        const message = !result ? "user not found" : undefined;
+        res.send({
+            success : result,
+            message
+        })
+    } catch (err : unknown) {
+        console.log(err)
+        return res.send({
+            success : false
+        })
+    }    
+})
 
 export default router
-
-// // http://localhost:3000/user/remove/{id}
-// router.delete('/user/remove/:id', async (req, res) => {
-//     const id = req.params.id;
-//     const singleUser = await Student.findByPk(id)
-//     console.log(singleUser)
-//     if (singleUser.length == 0) {
-//         return res.send({
-//             result : false,
-//             message : 'User not found!'
-//         })
-//     }
-//     try {
-//         await Student.destroy({
-//             where: {
-//               id // id : id
-//             }
-//         })
-//     } catch (err) {
-//         console.log(err)
-//         return res.send({
-//             result : false
-//         })
-//     }
-//     res.send({
-//         result : true
-//     })
-// })
-
-// module.exports = router
