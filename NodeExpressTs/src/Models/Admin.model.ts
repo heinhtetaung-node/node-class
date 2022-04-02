@@ -16,6 +16,8 @@ interface AdminAttributes extends AdminAttributesNoPw{
 
 export interface AdminTypeInput extends Optional<AdminAttributes, 'id'> {}
 export interface AdminTypeOutput extends Required<AdminAttributesNoPw> {}
+export interface AdminTypeOutputPw extends Required<AdminAttributes> {}
+
 
 class Admin extends Model<AdminAttributes, AdminTypeInput> implements AdminAttributes {
     public id!: number

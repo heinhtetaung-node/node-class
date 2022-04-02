@@ -1,12 +1,70 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
-import Admin, { AdminTypeInput, AdminTypeOutput } from '../Models/Admin.model'
+import Admin, { AdminTypeInput, AdminTypeOutput, AdminTypeOutputPw } from '../Models/Admin.model'
 import {check, validationResult, Result, ValidationError}  from 'express-validator'
 import bcryptjs from 'bcryptjs'
 import { createAdmin, getAdminByEmail } from "../Repositories/AdminRepo"
 
 // import checkJwtMiddleware from '../Middlewares/checkJwtMiddleware'
 import jwt from 'jsonwebtoken'
+
+interface AdminLoginRequest {
+    email : string
+    password : string
+}
+interface AdminLoginResponse {
+    success : boolean
+    token?: string
+    validateError ?: Result<ValidationError>
+    loginError ?: string
+    user?: AdminTypeOutput
+}
+router.post('/admin/login', 
+    check('email').notEmpty().withMessage('email is required').isEmail().withMessage('Email not valid'),
+    check('password').notEmpty().withMessage('passwrod is required'),
+    async (req : Request<AdminLoginRequest>, res : Response<AdminLoginResponse>) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) return res.status(400).json({ success: false, validateError : errors })
+        const { password, email } = req.body; 
+
+        const admin = await getAdminByEmail(email) as AdminTypeOutputPw
+        if (admin === null) {
+            return res.send({
+                success : false,
+                loginError: "Your email is not exist!"
+            })
+        }
+
+        try {
+            bcryptjs.compare(password, admin.password, async (err : unknown, result : boolean) => {
+                if ( result === true ) {
+                    const adminData = admin as any
+                    const adminDataValues = adminData.dataValues
+                    console.log(adminDataValues)
+                    delete adminDataValues.password
+                    console.log(adminDataValues)
+                    
+                    const token = jwt.sign(adminDataValues, 'secret');                
+                    return res.send({
+                        success : true,
+                        token,
+                        user : adminData
+                    })
+                } else {
+                    return res.send({
+                        success : false,
+                        loginError: "Password is not correct"
+                    })
+                }                
+            });
+        } catch (err) {
+            res.status(500).send({
+                success : false,
+                loginError : 'Something wrong!'
+            })
+        }
+    }
+)
 
 interface AdminAll {
     success : boolean

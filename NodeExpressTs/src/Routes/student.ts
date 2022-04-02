@@ -3,12 +3,15 @@ const router = express.Router();
 import { StudentTypeOutput, StudentTypeInput } from "../Models/Student.model"
 import { findAllStudents, createStudent, getStudentDetail, updateStudent, deleteStudent } from "../Repositories/StudentRepo";
 import { check, ValidationError, validationResult, Result } from "express-validator";
+import { checkJwtMiddleware, RequestWithAuth } from "../Middlewares/CheckAdmin";
 
 interface StudentGetAll {
     success : boolean
     datas : StudentTypeOutput[] | null
 }
-router.get('/student/select', async (req : Request, res : Response<StudentGetAll>) => {
+router.get('/student/select', 
+    checkJwtMiddleware,
+    async (req : RequestWithAuth<any>, res : Response<StudentGetAll>) => {
     try {
         const users = await findAllStudents();
         res.send({
@@ -27,9 +30,10 @@ interface StudentCreate {
     validateError ?: Result<ValidationError>
 }
 router.post('/student/add', 
+    checkJwtMiddleware,
     check('name').notEmpty().withMessage('name is required'),
     check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
-    async (req : Request<StudentTypeInput>, res : Response<StudentCreate>) => {
+    async (req : RequestWithAuth<StudentTypeInput>, res : Response<StudentCreate>) => {
     const errors = validationResult(req)
     
     if (!errors.isEmpty()) {
