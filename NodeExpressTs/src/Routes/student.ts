@@ -62,13 +62,14 @@ interface StudentUpdate extends StudentCreate {
     message ?: string
 }
 router.patch('/student/update/:id', 
+    checkJwtMiddleware,
     check('name').notEmpty().withMessage('name is required'),
     check('age').notEmpty().withMessage('age is required').isInt().withMessage('age must be numeric'),
-    async (req : Request<StudentTypeInput>, res : Response<StudentUpdate>) => {
+    async (req : RequestWithAuth<StudentTypeInput>, res : Response<StudentUpdate>) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) return res.status(400).json({ validateError: errors, success : false });    
 
-    const id : number = req.params.id as number;
+    const id : number = parseInt(req.params.id);
     const name : string = req.body.name;
     const age : number = req.body.age;
 
@@ -97,7 +98,9 @@ router.patch('/student/update/:id',
 interface StudentDelete extends StudentCreate {
     message?: string
 }
-router.delete('/student/remove/:id', async (req : Request, res : Response<StudentDelete>) => {
+router.delete('/student/remove/:id', 
+    checkJwtMiddleware,
+    async (req : RequestWithAuth<any>, res : Response<StudentDelete>) => {
     try {
         const id : number = parseInt(req.params.id)
         const result = await deleteStudent(id)

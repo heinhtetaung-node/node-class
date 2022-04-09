@@ -2,6 +2,10 @@ import express, { Application, Request, Response, NextFunction } from 'express'
 import { migrate } from "./Models/migration"
 import student from "./Routes/student"
 import admin from "./Routes/admin"
+import course from "./Routes/courses"
+import teacher from "./Routes/teacher"
+import classes from "./Routes/class"
+import joinedstudent from './Routes/joinedStudent'
 
 const app : Application = express()
 const port : number = 3000
@@ -11,6 +15,10 @@ app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({ extended: true }));
 app.use(student);
 app.use(admin);
+app.use(course)
+app.use(teacher)
+app.use(classes)
+app.use(joinedstudent)
 // app.get('/', (req : Request, res : Response) => {
 //   res.send('Hello World!')
 // })
